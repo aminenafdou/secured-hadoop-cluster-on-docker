@@ -1,0 +1,123 @@
+version: "3.9"
+
+services:
+
+  namenode:
+    hostname: namenode_1
+    build: .
+    tmpfs: /usr/local/hadoop/hadoop_data/namenode
+    volumes:
+      - ./config:/etc/hadoop/conf
+    networks:
+      hadoop:
+        ipv4_address: 192.168.100.2
+    environment:
+      HADOOP_CONF_DIR: /etc/hadoop/conf
+    command:
+      - /bin/bash
+      - --verbose
+      - -c
+      - |
+         sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
+         hdfs namenode -format
+         hdfs namenode
+    expose:
+      - 9870
+
+  datanode_1:
+    hostname: datanode_1
+    build: .
+    tmpfs: /usr/local/hadoop/hadoop_data/datanode
+    volumes:
+      - ./config:/etc/hadoop/conf
+    networks:
+      hadoop:
+        ipv4_address: 192.168.100.3
+    environment:
+      HADOOP_CONF_DIR: /etc/hadoop/conf
+    command:
+      - /bin/bash
+      - --verbose
+      - -c
+      - |
+         sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
+         hdfs datanode
+    depends_on:
+      - namenode
+    expose:
+      - 9864
+
+  datanode_2:
+    hostname: datanode_2
+    build: .
+    tmpfs: /usr/local/hadoop/hadoop_data/datanode
+    volumes:
+      - ./config:/etc/hadoop/conf
+    networks:
+      hadoop:
+        ipv4_address: 192.168.100.4
+    environment:
+      HADOOP_CONF_DIR: /etc/hadoop/conf
+    command:
+      - /bin/bash
+      - --verbose
+      - -c
+      - |
+         sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
+         hdfs datanode
+    depends_on:
+      - namenode
+    expose:
+      - 9864
+
+  datanode_3:
+    hostname: datanode_3
+    build: .
+    tmpfs: /usr/local/hadoop/hadoop_data/datanode
+    volumes:
+      - ./config:/etc/hadoop/conf
+    networks:
+      hadoop:
+        ipv4_address: 192.168.100.5
+    environment:
+      HADOOP_CONF_DIR: /etc/hadoop/conf
+    command:
+      - /bin/bash
+      - --verbose
+      - -c
+      - |
+         sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
+         hdfs datanode
+    depends_on:
+      - namenode
+    expose:
+      - 9864
+
+  edge_1:
+    hostname: edgenode_1
+    build: .
+    tmpfs: /home/hadoop
+    volumes:
+      - ./config:/etc/hadoop/conf
+    networks:
+      hadoop:
+        ipv4_address: 192.168.100.100
+    environment:
+      HADOOP_CONF_DIR: /etc/hadoop/conf
+    command:
+      - /bin/bash
+      - --verbose
+      - -c
+
+      - |
+         sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
+         sudo chown -R 1000:1000 /home/hadoop      # change ownership for hdfs (fs mounted with root ownership)
+         tail -f /dev/null
+    depends_on:
+      - namenode
+
+networks:
+  hadoop:
+    ipam:
+      config: 
+        - subnet: 192.168.100.0/24
