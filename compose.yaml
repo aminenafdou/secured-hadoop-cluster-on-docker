@@ -2,12 +2,18 @@ version: "3.9"
 
 services:
 
-  namenode:
-    hostname: namenode_1
+  namenode-1:
+    hostname: namenode-1
     build: .
-    tmpfs: /usr/local/hadoop/hadoop_data/namenode
+    cpus: 1
+    mem_limit: 1G
     volumes:
-      - ./config:/etc/hadoop/conf
+      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - type: tmpfs
+        target: /usr/local/hadoop/hadoop_data/namenode
+        tmpfs:
+          size: 10000000000 # 10 GB
     networks:
       hadoop:
         ipv4_address: 192.168.100.2
@@ -18,18 +24,24 @@ services:
       - --verbose
       - -c
       - |
-         sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
-         hdfs namenode -format
-         hdfs namenode
+        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
+        hdfs namenode -format
+        hdfs namenode
     expose:
       - 9870
 
-  datanode_1:
-    hostname: datanode_1
+  datanode-1:
+    hostname: datanode-1
     build: .
-    tmpfs: /usr/local/hadoop/hadoop_data/datanode
+    cpus: 1
+    mem_limit: 1G
     volumes:
-      - ./config:/etc/hadoop/conf
+      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - type: tmpfs
+        target: /usr/local/hadoop/hadoop_data/datanode
+        tmpfs:
+          size: 10000000000 # 10 GB
     networks:
       hadoop:
         ipv4_address: 192.168.100.3
@@ -40,19 +52,25 @@ services:
       - --verbose
       - -c
       - |
-         sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
-         hdfs datanode
+        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
+        hdfs datanode
     depends_on:
-      - namenode
+      - namenode-1
     expose:
       - 9864
 
-  datanode_2:
-    hostname: datanode_2
+  datanode-2:
+    hostname: datanode-2
     build: .
-    tmpfs: /usr/local/hadoop/hadoop_data/datanode
+    cpus: 1
+    mem_limit: 1G
     volumes:
-      - ./config:/etc/hadoop/conf
+      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - type: tmpfs
+        target: /usr/local/hadoop/hadoop_data/datanode
+        tmpfs:
+          size: 10000000000 # 10 GB
     networks:
       hadoop:
         ipv4_address: 192.168.100.4
@@ -63,19 +81,25 @@ services:
       - --verbose
       - -c
       - |
-         sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
-         hdfs datanode
+        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
+        hdfs datanode
     depends_on:
-      - namenode
+      - namenode-1
     expose:
       - 9864
 
-  datanode_3:
-    hostname: datanode_3
+  datanode-3:
+    hostname: datanode-3
     build: .
-    tmpfs: /usr/local/hadoop/hadoop_data/datanode
+    cpus: 1
+    mem_limit: 1G
     volumes:
-      - ./config:/etc/hadoop/conf
+      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - type: tmpfs
+        target: /usr/local/hadoop/hadoop_data/datanode
+        tmpfs:
+          size: 10000000000 # 10 GB
     networks:
       hadoop:
         ipv4_address: 192.168.100.5
@@ -86,38 +110,146 @@ services:
       - --verbose
       - -c
       - |
-         sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
-         hdfs datanode
+        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
+        hdfs datanode
     depends_on:
-      - namenode
+      - namenode-1
     expose:
       - 9864
 
-  edge_1:
-    hostname: edgenode_1
+  resourcemanager-1:
+    hostname: resourcemanager-1
     build: .
-    tmpfs: /home/hadoop
+    cpus: 1
+    mem_limit: 1G
     volumes:
-      - ./config:/etc/hadoop/conf
+      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./config/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
+      - ./config/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
+      - ./config/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
+      - type: tmpfs
+        target: /home/hadoop
+        tmpfs:
+          size: 10000000000 # 10 GB
+    networks:
+      hadoop:
+        ipv4_address: 192.168.100.51
+    environment:
+      HADOOP_CONF_DIR: /etc/hadoop/conf
+      HADOOP_HOME: /opt/hadoop
+      HADOOP_MAPRED_HOME: /opt/hadoop
+    command:
+      - /bin/bash
+      - --verbose
+      - -c
+      - |
+        yarn resourcemanager
+    expose:
+      - 8088
+
+  nodemanager-1:
+    hostname: nodemanager-1
+    build: .
+    cpus: 1
+    mem_limit: 1G
+    volumes:
+      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./config/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
+      - ./config/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
+      - ./config/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
+      - type: tmpfs
+        target: /home/hadoop
+        tmpfs:
+          size: 10000000000 # 10 GB
+    networks:
+      hadoop:
+        ipv4_address: 192.168.100.52
+    environment:
+      HADOOP_CONF_DIR: /etc/hadoop/conf
+      HADOOP_HOME: /opt/hadoop
+      HADOOP_MAPRED_HOME: /opt/hadoop
+    command:
+      - /bin/bash
+      - --verbose
+      - -c
+      - |
+        yarn nodemanager
+    depends_on:
+      - resourcemanager-1
+    expose:
+      - 8042
+
+  nodemanager-2:
+    hostname: nodemanager-2
+    build: .
+    cpus: 1
+    mem_limit: 1G
+    volumes:
+      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./config/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
+      - ./config/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
+      - ./config/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
+      - type: tmpfs
+        target: /home/hadoop
+        tmpfs:
+          size: 10000000000 # 10 GB
+    networks:
+      hadoop:
+        ipv4_address: 192.168.100.53
+    environment:
+      HADOOP_CONF_DIR: /etc/hadoop/conf
+      HADOOP_HOME: /opt/hadoop
+      HADOOP_MAPRED_HOME: /opt/hadoop
+    command:
+      - /bin/bash
+      - --verbose
+      - -c
+      - |
+        yarn nodemanager
+    depends_on:
+      - resourcemanager-1
+    expose:
+      - 8042
+
+  edge-1:
+    hostname: edgenode-1
+    build: .
+    cpus: 1
+    mem_limit: 1G
+    volumes:
+      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./config/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
+      - ./config/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
+      - type: tmpfs
+        target: /home/hadoop
+        tmpfs:
+          size: 10000000000 # 10 GB
     networks:
       hadoop:
         ipv4_address: 192.168.100.100
     environment:
       HADOOP_CONF_DIR: /etc/hadoop/conf
+      HADOOP_HOME: /opt/hadoop
+      HADOOP_MAPRED_HOME: /opt/hadoop
     command:
       - /bin/bash
       - --verbose
       - -c
 
       - |
-         sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
-         sudo chown -R 1000:1000 /home/hadoop      # change ownership for hdfs (fs mounted with root ownership)
-         tail -f /dev/null
+        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
+        sudo chown -R 1000:1000 /home/hadoop      # change ownership for hdfs (fs mounted with root ownership)
+        tail -f /dev/null
     depends_on:
-      - namenode
+      - namenode-1
+      - resourcemanager-1
 
 networks:
   hadoop:
     ipam:
-      config: 
+      config:
         - subnet: 192.168.100.0/24
