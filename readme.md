@@ -166,6 +166,7 @@ tcp        0      0 192.168.100.100:42354   192.168.100.2:8020      ESTABLISHED 
 
 ## Simple YARN Cluster
 
+![YARN communication simplified](yarn-cluster-simplified.png)
 
 ## The internal ports used by a YARN Resource manager are :
 
