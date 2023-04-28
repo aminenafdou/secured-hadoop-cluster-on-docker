@@ -14,10 +14,8 @@ services:
     networks:
       hadoop:
         ipv4_address: 192.168.100.200
-    environment:
-      KRB5_TRACE: /dev/stdout
-      KRB5_CONFIG: /etc/krb5/krb5.conf
-      KRB5_KDC_PROFILE: /etc/krb5kdc/kdc.conf
+    env_file:
+      - ./env-files/kerberos.env
     command:
       - /bin/bash
       - --verbose
@@ -39,54 +37,57 @@ services:
   namenode-1:
     hostname: namenode-1
     build: images/hadoop/.
+    user: hdfs
+    tty: false
     cpus: 1
     mem_limit: 1G
     volumes:
       - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
       - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
       - type: tmpfs
-        target: /usr/local/hadoop/hadoop_data/namenode
+        target: /opt/hadoop/hadoop_data
         tmpfs:
           size: 10000000000 # 10 GB
     networks:
       hadoop:
         ipv4_address: 192.168.100.2
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
+    env_file:
+      - ./env-files/hadoop.env
     command:
       - /bin/bash
       - --verbose
       - -c
       - |
-        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
-        hdfs namenode -format
-        hdfs namenode
+         hdfs namenode -format
+         hdfs namenode
     expose:
       - 9870
 
   datanode-1:
     hostname: datanode-1
     build: images/hadoop/.
+    user: hdfs
     cpus: 1
     mem_limit: 1G
     volumes:
       - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
       - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
       - type: tmpfs
-        target: /usr/local/hadoop/hadoop_data/datanode
+        target: /opt/hadoop/hadoop_data
         tmpfs:
           size: 10000000000 # 10 GB
     networks:
       hadoop:
         ipv4_address: 192.168.100.3
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
+    env_file:
+      - ./env-files/hadoop.env
     command:
       - /bin/bash
       - --verbose
       - -c
       - |
-        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
         hdfs datanode
     depends_on:
       - namenode-1
@@ -96,26 +97,27 @@ services:
   datanode-2:
     hostname: datanode-2
     build: images/hadoop/.
+    user: hdfs
     cpus: 1
     mem_limit: 1G
     volumes:
       - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
       - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
       - type: tmpfs
-        target: /usr/local/hadoop/hadoop_data/datanode
+        target: /opt/hadoop/hadoop_data
         tmpfs:
           size: 10000000000 # 10 GB
     networks:
       hadoop:
         ipv4_address: 192.168.100.4
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
+    env_file:
+      - ./env-files/hadoop.env
     command:
       - /bin/bash
       - --verbose
       - -c
       - |
-        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
         hdfs datanode
     depends_on:
       - namenode-1
@@ -125,26 +127,27 @@ services:
   datanode-3:
     hostname: datanode-3
     build: images/hadoop/.
+    user: hdfs
     cpus: 1
     mem_limit: 1G
     volumes:
       - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
       - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
       - type: tmpfs
-        target: /usr/local/hadoop/hadoop_data/datanode
+        target: /opt/hadoop/hadoop_data
         tmpfs:
           size: 10000000000 # 10 GB
     networks:
       hadoop:
         ipv4_address: 192.168.100.5
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
+    env_file:
+      - ./env-files/hadoop.env
     command:
       - /bin/bash
       - --verbose
       - -c
       - |
-        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
         hdfs datanode
     depends_on:
       - namenode-1
@@ -154,6 +157,7 @@ services:
   resourcemanager-1:
     hostname: resourcemanager-1
     build: images/hadoop/.
+    user: yarn
     cpus: 1
     mem_limit: 1G
     volumes:
@@ -162,17 +166,16 @@ services:
       - ./configs/hadoop/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
       - ./configs/hadoop/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
       - ./configs/hadoop/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
       - type: tmpfs
-        target: /home/hadoop
+        target: /opt/hadoop/hadoop_data
         tmpfs:
           size: 10000000000 # 10 GB
     networks:
       hadoop:
         ipv4_address: 192.168.100.51
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
-      HADOOP_HOME: /opt/hadoop
-      HADOOP_MAPRED_HOME: /opt/hadoop
+    env_file:
+      - ./env-files/hadoop.env
     command:
       - /bin/bash
       - --verbose
@@ -185,6 +188,7 @@ services:
   nodemanager-1:
     hostname: nodemanager-1
     build: images/hadoop/.
+    user: yarn
     cpus: 1
     mem_limit: 1G
     volumes:
@@ -193,17 +197,16 @@ services:
       - ./configs/hadoop/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
       - ./configs/hadoop/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
       - ./configs/hadoop/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
       - type: tmpfs
-        target: /home/hadoop
+        target: /opt/hadoop/hadoop_data
         tmpfs:
           size: 10000000000 # 10 GB
     networks:
       hadoop:
         ipv4_address: 192.168.100.52
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
-      HADOOP_HOME: /opt/hadoop
-      HADOOP_MAPRED_HOME: /opt/hadoop
+    env_file:
+      - ./env-files/hadoop.env
     command:
       - /bin/bash
       - --verbose
@@ -220,23 +223,23 @@ services:
     build: images/hadoop/.
     cpus: 1
     mem_limit: 1G
+    user: yarn
     volumes:
       - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
       - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
       - ./configs/hadoop/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
       - ./configs/hadoop/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
       - ./configs/hadoop/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
       - type: tmpfs
-        target: /home/hadoop
+        target: /opt/hadoop/hadoop_data
         tmpfs:
           size: 10000000000 # 10 GB
     networks:
       hadoop:
         ipv4_address: 192.168.100.53
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
-      HADOOP_HOME: /opt/hadoop
-      HADOOP_MAPRED_HOME: /opt/hadoop
+    env_file:
+      - ./env-files/hadoop.env
     command:
       - /bin/bash
       - --verbose
@@ -253,32 +256,27 @@ services:
     build: images/hadoop/.
     cpus: 1
     mem_limit: 1G
+    user: hadoop
     volumes:
       - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
       - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
       - ./configs/hadoop/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
       - ./configs/hadoop/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
-      - ./configs/kerberos/krb5.conf:/var/kerberos/krb5kdc/krb5.conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
       - type: tmpfs
-        target: /home/hadoop
+        target: /opt/hadoop/hadoop_data
         tmpfs:
           size: 10000000000 # 10 GB
     networks:
       hadoop:
         ipv4_address: 192.168.100.100
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
-      HADOOP_HOME: /opt/hadoop
-      HADOOP_MAPRED_HOME: /opt/hadoop
-      KRB5_CONFIG: /var/kerberos/krb5kdc/krb5.conf
+    env_file:
+      - ./env-files/hadoop.env
     command:
       - /bin/bash
       - --verbose
       - -c
-
       - |
-        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
-        sudo chown -R 1000:1000 /home/hadoop      # change ownership for hdfs (fs mounted with root ownership)
         tail -f /dev/null
     depends_on:
       - namenode-1

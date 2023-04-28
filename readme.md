@@ -81,23 +81,24 @@ echo 'Hello World !' | hdfs dfs -put - /newfile.txt
 hdfs dfs -cat /newfile.txt
 
 # or maybe a quick way to generate a dumb file of 1GB
-filename=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1); dd if=/dev/urandom of="$filename" bs=1M count=100 && hdfs dfs -put "$filename" / && rm "$filename"
-
-# connect to the edge node
-docker exec -it hadoop-developer-starterkit-edge-1-1 bash
+filename=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1); dd if=/dev/urandom of="$filename" bs=1M count=1000 && hdfs dfs -put "$filename" / && rm "$filename"
 
 # put a simple file on hdfs as an input for the map-reduce job to run on yarn
 echo 'Hadoop is the Elephant King! \\nA yellow and elegant thing.\\nHe never forgets\\nUseful data, or lets\\nAn extraneous element cling! ' | hdfs dfs -put - /input.txt
 
 # run a simple map-reduce job on yarn (wordcount example)
 yarn jar /opt/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.1.jar wordcount /input.txt /output
+
+# and then show it
+hdfs dfs -cat /output/*
+
 ```
 
 ## Useful commands
 
 ```
 # open an interactive bash session on the container of hdfs namenode
-docker exec -it hadoop-developer-starterkit-namenode-1 bash
+docker exec -it hadoop-developer-starterkit-namenode-1-1 bash
 
 # open an interactive bash session on the container of the first hdfs datanode
 docker exec -it hadoop-developer-starterkit-datanode-1-1 bash
