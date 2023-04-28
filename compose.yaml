@@ -2,14 +2,48 @@ version: "3.9"
 
 services:
 
-  namenode-1:
-    hostname: namenode-1
-    build: .
+  kerberos-server:
+    hostname: kerberos-server
+    build: images/kerberos/.
     cpus: 1
     mem_limit: 1G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./configs/kerberos/kdc.conf:/etc/krb5kdc/kdc.conf
+      - ./configs/kerberos/kadm5.acl:/etc/krb5kdc/kadm5.acl
+    networks:
+      hadoop:
+        ipv4_address: 192.168.100.200
+    environment:
+      KRB5_TRACE: /dev/stdout
+      KRB5_CONFIG: /etc/krb5/krb5.conf
+      KRB5_KDC_PROFILE: /etc/krb5kdc/kdc.conf
+    command:
+      - /bin/bash
+      - --verbose
+      - -c
+      - |
+        # Creating KDC Database
+        echo -e "dumbmasterpasswd\ndumbmasterpasswd\n" | kdb5_util create -s
+        # Creating kadmin User
+        kadmin.local -q "addprinc -pw dumbadminpasswd admin/admin@HADOOP.LOCAL"
+        # Starting kadmin daemon
+        kadmind
+        # Starting KDC server (not in daemon mode)
+        krb5kdc -n
+    expose:
+      - 88
+      - 464
+      - 749
+
+  namenode-1:
+    hostname: namenode-1
+    build: images/hadoop/.
+    cpus: 1
+    mem_limit: 1G
+    volumes:
+      - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
       - type: tmpfs
         target: /usr/local/hadoop/hadoop_data/namenode
         tmpfs:
@@ -32,12 +66,12 @@ services:
 
   datanode-1:
     hostname: datanode-1
-    build: .
+    build: images/hadoop/.
     cpus: 1
     mem_limit: 1G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
       - type: tmpfs
         target: /usr/local/hadoop/hadoop_data/datanode
         tmpfs:
@@ -61,12 +95,12 @@ services:
 
   datanode-2:
     hostname: datanode-2
-    build: .
+    build: images/hadoop/.
     cpus: 1
     mem_limit: 1G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
       - type: tmpfs
         target: /usr/local/hadoop/hadoop_data/datanode
         tmpfs:
@@ -90,12 +124,12 @@ services:
 
   datanode-3:
     hostname: datanode-3
-    build: .
+    build: images/hadoop/.
     cpus: 1
     mem_limit: 1G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
       - type: tmpfs
         target: /usr/local/hadoop/hadoop_data/datanode
         tmpfs:
@@ -119,15 +153,15 @@ services:
 
   resourcemanager-1:
     hostname: resourcemanager-1
-    build: .
+    build: images/hadoop/.
     cpus: 1
     mem_limit: 1G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
-      - ./config/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
-      - ./config/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
-      - ./config/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
+      - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./configs/hadoop/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
+      - ./configs/hadoop/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
+      - ./configs/hadoop/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
       - type: tmpfs
         target: /home/hadoop
         tmpfs:
@@ -150,15 +184,15 @@ services:
 
   nodemanager-1:
     hostname: nodemanager-1
-    build: .
+    build: images/hadoop/.
     cpus: 1
     mem_limit: 1G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
-      - ./config/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
-      - ./config/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
-      - ./config/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
+      - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./configs/hadoop/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
+      - ./configs/hadoop/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
+      - ./configs/hadoop/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
       - type: tmpfs
         target: /home/hadoop
         tmpfs:
@@ -183,15 +217,15 @@ services:
 
   nodemanager-2:
     hostname: nodemanager-2
-    build: .
+    build: images/hadoop/.
     cpus: 1
     mem_limit: 1G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
-      - ./config/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
-      - ./config/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
-      - ./config/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
+      - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./configs/hadoop/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
+      - ./configs/hadoop/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
+      - ./configs/hadoop/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
       - type: tmpfs
         target: /home/hadoop
         tmpfs:
@@ -216,14 +250,15 @@ services:
 
   edge-1:
     hostname: edgenode-1
-    build: .
+    build: images/hadoop/.
     cpus: 1
     mem_limit: 1G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
-      - ./config/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
-      - ./config/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
+      - ./configs/hadoop/core-site.xml:/etc/hadoop/conf/core-site.xml
+      - ./configs/hadoop/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
+      - ./configs/hadoop/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
+      - ./configs/hadoop/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
+      - ./configs/kerberos/krb5.conf:/var/kerberos/krb5kdc/krb5.conf
       - type: tmpfs
         target: /home/hadoop
         tmpfs:
@@ -235,6 +270,7 @@ services:
       HADOOP_CONF_DIR: /etc/hadoop/conf
       HADOOP_HOME: /opt/hadoop
       HADOOP_MAPRED_HOME: /opt/hadoop
+      KRB5_CONFIG: /var/kerberos/krb5kdc/krb5.conf
     command:
       - /bin/bash
       - --verbose

@@ -9,4 +9,4 @@ LABEL license="Hadoop: Apache License 2.0"
 ARG HADOOP_URL=https://dlcdn.apache.org/hadoop/common/hadoop-3.3.5/hadoop-3.3.5.tar.gz
 
 # Install some debugging tools 
-RUN /bin/bash -c 'sudo yum install -y net-tools bind-utils dnsutils'
+RUN /bin/bash -c 'sudo yum install -y net-tools bind-utils dnsutils vim'
