@@ -46,7 +46,6 @@
     RULE:[2:$1/$2@$0](jhs/.*@.*HADOOP.LOCAL)s/.*/mapred/
     RULE:[1:$1@$0](tester@HADOOP.LOCAL)s/.*/tester/
     DEFAULT
-           DEFAULT
     </value>
     <description>The mapping from Kerberos principal names to local OS user names.</description>
   </property>
