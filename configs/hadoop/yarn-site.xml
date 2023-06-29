@@ -1,0 +1,88 @@
+<configuration>
+
+  <property>
+    <description>The hostname of the RM.</description>
+    <name>yarn.resourcemanager.hostname</name>
+    <value>resourcemanager-1.hadoop</value>
+  </property>
+
+  <property>
+    <description>Whether to enable log aggregation. Log aggregation collects
+      each container's logs and moves these logs onto a file-system, for e.g.
+      HDFS, after the application completes. Users can configure the
+      "yarn.nodemanager.remote-app-log-dir" and
+      "yarn.nodemanager.remote-app-log-dir-suffix" properties to determine
+      where these logs are moved to. Users can access the logs via the
+      Application Timeline Server.
+    </description>
+    <name>yarn.log-aggregation-enable</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>yarn.application.classpath</name>
+    <value> $HADOOP_CONF_DIR,$HADOOP_COMMON_HOME/share/hadoop/common/*,$HADOOP_COMMON_HOME/share/hadoop/common/lib/*,$HADOOP_HDFS_HOME/share/hadoop/hdfs/*,$HADOOP_HDFS_HOME/share/hadoop/hdfs/lib/*,$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*,$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*,
+    $HADOOP_YARN_HOME/share/hadoop/yarn/*,$HADOOP_YARN_HOME/share/hadoop/yarn/lib/* 
+    </value>
+  </property>
+
+  <property>
+    <description>A comma separated list of services where service name should only
+      contain a-zA-Z0-9_ and can not start with numbers</description>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce_shuffle</value>
+  </property>
+
+  <property>
+    <description>The Kerberos principal for the resource manager.</description>
+    <name>yarn.resourcemanager.principal</name>
+    <value>rm/_HOST@HADOOP.LOCAL</value>
+  </property>
+
+  <property>
+    <description>The keytab for the resource manager.</description>
+    <name>yarn.resourcemanager.keytab</name>
+    <value>/etc/security/keytabs/rm.service.keytab</value>
+  </property>
+
+  <property>
+    <description>The kerberos principal for the node manager.</description>
+    <name>yarn.nodemanager.principal</name>
+    <value>nm/_HOST@HADOOP.LOCAL</value>
+  </property>
+
+  <property>
+    <description>Keytab for NM.</description>
+    <name>yarn.nodemanager.keytab</name>
+    <value>/etc/security/keytabs/nm.service.keytab</value>
+  </property>
+
+  <property>
+    <description>who will execute(launch) the containers.</description>
+    <name>yarn.nodemanager.container-executor.class</name>
+    <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
+  </property>
+
+  <property>
+    <description>The path to the Linux container executor.</description>
+    <name>yarn.nodemanager.linux-container-executor.path</name>
+    <value>/var/lib/yarn-ce/container-executor</value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.group</name>
+    <value>hadoop</value>
+  </property>
+
+  <property>
+      <description>
+        This configures the HTTP endpoint for YARN Daemons.The following
+        values are supported:
+        - HTTP_ONLY : Service is provided only on http
+        - HTTPS_ONLY : Service is provided only on https
+      </description>
+      <name>yarn.http.policy</name>
+      <value>HTTPS_ONLY</value>
+  </property>
+
+</configuration>

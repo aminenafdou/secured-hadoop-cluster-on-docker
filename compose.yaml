@@ -2,254 +2,318 @@ version: "3.9"
 
 services:
 
+  kerberos-server:
+    container_name: kerberos-server
+    hostname: kerberos-server.hadoop
+    build: images/kerberos/.
+    cpus: 1
+    mem_limit: 1G
+    user: kerberos
+    volumes:
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./configs/kerberos/kdc.conf:/etc/krb5kdc/kdc.conf
+      - ./configs/kerberos/kadm5.acl:/etc/krb5kdc/kadm5.acl
+      - ./scripts/kerberos:/home/kerberos/scripts
+    networks:
+      hadoop:
+        ipv4_address: 192.168.100.200
+    env_file:
+      - ./env-files/kerberos.env
+    command:
+      - /bin/bash
+      - --verbose
+      - -c
+      - |
+         ~/scripts/kerberos-init.sh
+    expose:
+      - 88
+      - 464
+      - 749
+
   namenode-1:
-    hostname: namenode-1
-    build: .
+    container_name: namenode-1
+    hostname: namenode-1.hadoop
+    build: images/hadoop/.
+    user: hdfs
+    tty: false
     cpus: 1
     mem_limit: 1G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
-      - type: tmpfs
-        target: /usr/local/hadoop/hadoop_data/namenode
-        tmpfs:
-          size: 10000000000 # 10 GB
+      - ./configs/hadoop:/etc/hadoop/conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./scripts/hadoop:/opt/hadoop/scripts
+      - my-shared-volume:/etc/security/hadoop-trustores
+    tmpfs:
+      - /opt/hadoop/hadoop_data:uid=1000,gid=1000,mode=770,size=10G
     networks:
       hadoop:
         ipv4_address: 192.168.100.2
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
+    env_file:
+      - ./env-files/hadoop.env
+      - ./env-files/hdfs.env
     command:
       - /bin/bash
       - --verbose
       - -c
       - |
-        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
-        hdfs namenode -format
-        hdfs namenode
+         ~/scripts/namenode-init.sh
+    healthcheck:
+      test: ["CMD", "curl", "-k", "-f", "https://namenode-1.hadoop:9871"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      kerberos-server:
+        condition: service_started
     expose:
-      - 9870
+      - 9871
 
   datanode-1:
-    hostname: datanode-1
-    build: .
+    container_name: datanode-1
+    hostname: datanode-1.hadoop
+    build: images/hadoop/.
+    user: hdfs
     cpus: 1
     mem_limit: 1G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
-      - type: tmpfs
-        target: /usr/local/hadoop/hadoop_data/datanode
-        tmpfs:
-          size: 10000000000 # 10 GB
+      - ./configs/hadoop:/etc/hadoop/conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./scripts/hadoop:/opt/hadoop/scripts
+      - my-shared-volume:/etc/security/hadoop-trustores
+    tmpfs:
+      - /opt/hadoop/hadoop_data:uid=1000,gid=1000,mode=770,size=10G
     networks:
       hadoop:
         ipv4_address: 192.168.100.3
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
+    env_file:
+      - ./env-files/hadoop.env
+      - ./env-files/hdfs.env
     command:
       - /bin/bash
       - --verbose
       - -c
       - |
-        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
-        hdfs datanode
+         ~/scripts/datanode-init.sh
+    healthcheck:
+      test: ["CMD", "curl", "-k", "-f", "https://datanode-1.hadoop:9865"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     depends_on:
-      - namenode-1
+      namenode-1:
+        condition: service_healthy
+      kerberos-server:
+        condition: service_started
     expose:
-      - 9864
+      - 9865
 
   datanode-2:
-    hostname: datanode-2
-    build: .
+    container_name: datanode-2
+    hostname: datanode-2.hadoop
+    build: images/hadoop/.
+    user: hdfs
     cpus: 1
     mem_limit: 1G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
-      - type: tmpfs
-        target: /usr/local/hadoop/hadoop_data/datanode
-        tmpfs:
-          size: 10000000000 # 10 GB
+      - ./configs/hadoop:/etc/hadoop/conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./scripts/hadoop:/opt/hadoop/scripts
+      - my-shared-volume:/etc/security/hadoop-trustores
+    tmpfs:
+      - /opt/hadoop/hadoop_data:uid=1000,gid=1000,mode=770,size=10G
     networks:
       hadoop:
         ipv4_address: 192.168.100.4
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
+    env_file:
+      - ./env-files/hadoop.env
+      - ./env-files/hdfs.env
     command:
       - /bin/bash
       - --verbose
       - -c
       - |
-        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
-        hdfs datanode
+         ~/scripts/datanode-init.sh
+    healthcheck:
+      test: ["CMD", "curl", "-k", "-f", "https://datanode-2.hadoop:9865"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     depends_on:
-      - namenode-1
+      namenode-1:
+        condition: service_healthy
+      kerberos-server:
+        condition: service_started
     expose:
-      - 9864
-
-  datanode-3:
-    hostname: datanode-3
-    build: .
-    cpus: 1
-    mem_limit: 1G
-    volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
-      - type: tmpfs
-        target: /usr/local/hadoop/hadoop_data/datanode
-        tmpfs:
-          size: 10000000000 # 10 GB
-    networks:
-      hadoop:
-        ipv4_address: 192.168.100.5
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
-    command:
-      - /bin/bash
-      - --verbose
-      - -c
-      - |
-        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
-        hdfs datanode
-    depends_on:
-      - namenode-1
-    expose:
-      - 9864
+      - 9865
 
   resourcemanager-1:
-    hostname: resourcemanager-1
-    build: .
+    container_name: resourcemanager-1
+    hostname: resourcemanager-1.hadoop
+    build: images/hadoop/.
+    user: yarn
     cpus: 1
-    mem_limit: 1G
+    mem_limit: 4G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
-      - ./config/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
-      - ./config/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
-      - ./config/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
-      - type: tmpfs
-        target: /home/hadoop
-        tmpfs:
-          size: 10000000000 # 10 GB
+      - ./configs/hadoop:/etc/hadoop/conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./scripts/hadoop:/opt/hadoop/scripts
+      - my-shared-volume:/etc/security/hadoop-trustores
+    tmpfs:
+      - /opt/hadoop/hadoop_data:uid=1000,gid=1000,mode=770,size=10G
     networks:
       hadoop:
         ipv4_address: 192.168.100.51
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
-      HADOOP_HOME: /opt/hadoop
-      HADOOP_MAPRED_HOME: /opt/hadoop
+    env_file:
+      - ./env-files/hadoop.env
+      - ./env-files/yarn.env
     command:
       - /bin/bash
       - --verbose
       - -c
       - |
-        yarn resourcemanager
+         ~/scripts/resourcemanager-init.sh
+    healthcheck:
+      test: ["CMD", "curl", "-k", "-f", "https://resourcemanager-1.hadoop:8090/"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      namenode-1:
+        condition: service_healthy
+      kerberos-server:
+        condition: service_started
     expose:
-      - 8088
+      - 8090
 
   nodemanager-1:
-    hostname: nodemanager-1
-    build: .
+    container_name: nodemanager-1
+    hostname: nodemanager-1.hadoop
+    build: images/hadoop/.
+    user: yarn
     cpus: 1
-    mem_limit: 1G
+    mem_limit: 2G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
-      - ./config/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
-      - ./config/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
-      - ./config/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
-      - type: tmpfs
-        target: /home/hadoop
-        tmpfs:
-          size: 10000000000 # 10 GB
+      - ./configs/hadoop:/etc/hadoop/conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./configs/hadoop/container-executor.cfg:/var/lib/etc/hadoop/container-executor.cfg
+      - ./scripts/hadoop:/opt/hadoop/scripts
+      - my-shared-volume:/etc/security/hadoop-trustores
+    tmpfs:
+      - /opt/hadoop/hadoop_data:uid=1000,gid=1000,mode=770,size=10G
+      - /var/lib/yarn-ce:uid=1,gid=1000,mode=770,size=10G,exec,suid
     networks:
       hadoop:
         ipv4_address: 192.168.100.52
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
-      HADOOP_HOME: /opt/hadoop
-      HADOOP_MAPRED_HOME: /opt/hadoop
+    env_file:
+      - ./env-files/hadoop.env
+      - ./env-files/yarn.env
     command:
       - /bin/bash
       - --verbose
       - -c
       - |
-        yarn nodemanager
+         ~/scripts/nodemanager-init.sh
+    healthcheck:
+      test: ["CMD", "curl", "-k", "-f", "https://nodemanager-1.hadoop:8044/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     depends_on:
-      - resourcemanager-1
+      resourcemanager-1:
+        condition: service_healthy
     expose:
-      - 8042
+      - 8044
 
   nodemanager-2:
-    hostname: nodemanager-2
-    build: .
+    container_name: nodemanager-2
+    hostname: nodemanager-2.hadoop
+    build: images/hadoop/.
+    user: yarn
     cpus: 1
-    mem_limit: 1G
+    mem_limit: 2G
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
-      - ./config/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
-      - ./config/capacity-scheduler.xml:/etc/hadoop/conf/capacity-scheduler.xml
-      - ./config/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
-      - type: tmpfs
-        target: /home/hadoop
-        tmpfs:
-          size: 10000000000 # 10 GB
+      - ./configs/hadoop:/etc/hadoop/conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./configs/hadoop/container-executor.cfg:/var/lib/etc/hadoop/container-executor.cfg
+      - ./scripts/hadoop:/opt/hadoop/scripts
+      - my-shared-volume:/etc/security/hadoop-trustores
+    tmpfs:
+      - /opt/hadoop/hadoop_data:uid=1000,gid=1000,mode=770,size=10G
+      - /var/lib/yarn-ce:uid=1,gid=1000,mode=770,size=10G,exec,suid
     networks:
       hadoop:
         ipv4_address: 192.168.100.53
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
-      HADOOP_HOME: /opt/hadoop
-      HADOOP_MAPRED_HOME: /opt/hadoop
+    env_file:
+      - ./env-files/hadoop.env
+      - ./env-files/yarn.env
     command:
       - /bin/bash
       - --verbose
       - -c
       - |
-        yarn nodemanager
+         ~/scripts/nodemanager-init.sh
+    healthcheck:
+      test: ["CMD", "curl", "-k", "-f", "https://nodemanager-2.hadoop:8044/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     depends_on:
-      - resourcemanager-1
+      resourcemanager-1:
+        condition: service_healthy
     expose:
-      - 8042
+      - 8044
 
-  edge-1:
-    hostname: edgenode-1
-    build: .
+  edgenode-1:
+    container_name: edgenode-1
+    hostname: edgenode-1.hadoop
+    build: images/hadoop/.
     cpus: 1
     mem_limit: 1G
+    user: hadoop
     volumes:
-      - ./config/core-site.xml:/etc/hadoop/conf/core-site.xml
-      - ./config/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml
-      - ./config/yarn-site.xml:/etc/hadoop/conf/yarn-site.xml
-      - ./config/mapred-site.xml:/etc/hadoop/conf/mapred-site.xml
-      - type: tmpfs
-        target: /home/hadoop
-        tmpfs:
-          size: 10000000000 # 10 GB
+      - ./configs/hadoop:/etc/hadoop/conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./scripts/hadoop:/opt/hadoop/scripts
+    tmpfs:
+      - /opt/hadoop/hadoop_data:uid=1000,gid=1000,mode=770,size=10G
     networks:
       hadoop:
         ipv4_address: 192.168.100.100
-    environment:
-      HADOOP_CONF_DIR: /etc/hadoop/conf
-      HADOOP_HOME: /opt/hadoop
-      HADOOP_MAPRED_HOME: /opt/hadoop
+    env_file:
+      - ./env-files/hadoop.env
     command:
       - /bin/bash
       - --verbose
       - -c
-
       - |
-        sudo chown -R 1000:1000 /usr/local/hadoop # change ownership for hdfs (fs mounted with root ownership)
-        sudo chown -R 1000:1000 /home/hadoop      # change ownership for hdfs (fs mounted with root ownership)
-        tail -f /dev/null
+         ~/scripts/edgenode-init.sh
+         tail -f /dev/null
     depends_on:
-      - namenode-1
-      - resourcemanager-1
+      resourcemanager-1:
+        condition: service_healthy
+      nodemanager-1:
+        condition: service_healthy
+      nodemanager-2:
+        condition: service_healthy
 
 networks:
   hadoop:
+    name: hadoop
     ipam:
       config:
         - subnet: 192.168.100.0/24
+
+volumes:
+  # Shared volume to mount on every hadoop host to list trusted self signed certificates...
+  my-shared-volume:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: uid=1000,gid=1000,mode=770

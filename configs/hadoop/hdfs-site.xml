@@ -1,0 +1,235 @@
+<configuration>
+
+  <property>
+    <name>dfs.datanode.http.address</name>
+    <value>0.0.0.0:9864</value>
+    <description>
+    The datanode http server address and port.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.replication</name>
+    <value>2</value>
+    <description>Default block replication. 
+  The actual number of replications can be specified when the file is created.
+  The default is used if replication is not specified in create time.
+    </description>
+  </property>
+
+
+  <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>/opt/hadoop/hadoop_data/namenode</value>
+    <description>Determines where on the local filesystem the DFS name node
+      should store the name table(fsimage).  If this is a comma-delimited list
+      of directories then the name table is replicated in all of the
+      directories, for redundancy. </description>
+  </property>
+
+  <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>/opt/hadoop/hadoop_data/datanode</value>
+    <description>Determines where on the local filesystem an DFS data node
+  should store its blocks.  If this is a comma-delimited
+  list of directories, then data will be stored in all named
+  directories, typically on different devices. The directories should be tagged
+  with corresponding storage types ([SSD]/[DISK]/[ARCHIVE]/[RAM_DISK]/[NVDIMM]) for HDFS
+  storage policies. The default storage type will be DISK if the directory does
+  not have a storage type tagged explicitly. Directories that do not exist will
+  be created if local filesystem permission allows.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.permissions.enabled</name>
+    <value>false</value>
+    <description>
+    If "true", enable permission checking in HDFS.
+    If "false", permission checking is turned off,
+    but all other behavior is unchanged.
+    Switching from one parameter value to the other does not change the mode,
+    owner or group of files or directories.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.data.transfer.protection</name>
+    <value>privacy</value>
+    <description>
+    A comma-separated list of SASL protection values used for secured
+    connections to the DataNode when reading or writing block data.  Possible
+    values are authentication, integrity and privacy.  authentication means
+    authentication only and no integrity or privacy; integrity implies
+    authentication and integrity are enabled; and privacy implies all of
+    authentication, integrity and privacy are enabled.  If
+    dfs.encrypt.data.transfer is set to true, then it supersedes the setting for
+    dfs.data.transfer.protection and enforces that all connections must use a
+    specialized encrypted SASL handshake.  This property is ignored for
+    connections to a DataNode listening on a privileged port.  In this case, it
+    is assumed that the use of a privileged port establishes sufficient trust.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.encrypt.data.transfer</name>
+    <value>true</value>
+    <description>
+    Whether or not actual block data that is read/written from/to HDFS should
+    be encrypted on the wire. This only needs to be set on the NN and DNs,
+    clients will deduce this automatically. It is possible to override this setting 
+    per connection by specifying custom logic via dfs.trustedchannel.resolver.class. 
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.encrypt.data.transfer.algorithm</name>
+    <value>3des</value>
+    <description>
+    This value may be set to either "3des" or "rc4". If nothing is set, then
+    the configured JCE default on the system is used (usually 3DES.) It is
+    widely believed that 3DES is more cryptographically secure, but RC4 is
+    substantially faster.
+    
+    Note that if AES is supported by both the client and server then this 
+    encryption algorithm will only be used to initially transfer keys for AES.
+    (See dfs.encrypt.data.transfer.cipher.suites.)
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.http.policy</name>
+    <value>HTTPS_ONLY</value>
+    <description>Decide if HTTPS(SSL) is supported on HDFS
+    This configures the HTTP endpoint for HDFS daemons:
+      The following values are supported:
+      - HTTP_ONLY : Service is provided only on http
+      - HTTPS_ONLY : Service is provided only on https
+      - HTTP_AND_HTTPS : Service is provided both on http and https
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.block.access.token.enable</name>
+    <value>true</value>
+    <description>
+    If "true", access tokens are used as capabilities for accessing datanodes.
+    If "false", no access tokens are checked on accessing datanodes.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.namenode.kerberos.principal</name>
+    <value>nn/_HOST@HADOOP.LOCAL</value>
+    <description>
+    The NameNode service principal. This is typically set to
+    nn/_HOST@REALM.TLD. Each NameNode will substitute _HOST with its
+    own fully qualified hostname at startup. The _HOST placeholder
+    allows using the same configuration setting on both NameNodes
+    in an HA setup.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.namenode.keytab.file</name>
+    <value>/etc/security/keytabs/nn.service.keytab</value>
+    <description>
+    The keytab file used by each NameNode daemon to login as its
+    service principal. The principal name is configured with
+    dfs.namenode.kerberos.principal.
+    </description>
+  </property>
+
+
+  <property>
+    <name>dfs.web.authentication.kerberos.principal</name>
+    <value>HTTP/_HOST@HADOOP.LOCAL</value>
+    <description>
+    The server principal used by the NameNode for WebHDFS SPNEGO
+    authentication.
+
+    Required when WebHDFS and security are enabled. In most secure clusters this
+    setting is also used to specify the values for
+    dfs.namenode.kerberos.internal.spnego.principal and
+    dfs.journalnode.kerberos.internal.spnego.principal.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.web.authentication.kerberos.keytab</name>
+    <value>/etc/security/keytabs/nn.service.keytab</value>
+    <description>
+    The keytab file for the principal corresponding to
+    dfs.web.authentication.kerberos.principal.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.namenode.kerberos.internal.spnego.principal</name>
+    <value>$dfs.web.authentication.kerberos.principal</value>
+  </property>
+
+  <property>
+    <name>dfs.datanode.kerberos.principal</name>
+    <value>dn/_HOST@HADOOP.LOCAL</value>
+    <description>
+    The DataNode service principal. This is typically set to
+    dn/_HOST@REALM.TLD. Each DataNode will substitute _HOST with its
+    own fully qualified hostname at startup. The _HOST placeholder
+    allows using the same configuration setting on all DataNodes.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.datanode.keytab.file</name>
+    <value>/etc/security/keytabs/dn.service.keytab</value>
+    <description>
+    The keytab file used by each DataNode daemon to login as its
+    service principal. The principal name is configured with
+    dfs.datanode.kerberos.principal.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.permissions.superusergroup</name>
+    <value>hadoop</value>
+    <description>The name of the group of super-users.
+    The value should be a single group name.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.datanode.use.datanode.hostname</name>
+    <value>true</value>
+    <description>Whether datanodes should use datanode hostnames when
+    connecting to other datanodes for data transfer.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.client.use.datanode.hostname</name>
+    <value>false</value>
+    <description>Whether clients should use datanode hostnames when
+    connecting to datanodes.
+    </description>
+    
+  </property>
+
+
+  <property>
+    <name>dfs.namenode.datanode.registration.ip-hostname-check</name>
+    <value>false</value>
+    <description>
+    If true (the default), then the namenode requires that a connecting
+    datanode's address must be resolved to a hostname.  If necessary, a reverse
+    DNS lookup is performed.  All attempts to register a datanode from an
+    unresolvable address are rejected.
+
+    It is recommended that this setting be left on to prevent accidental
+    registration of datanodes listed by hostname in the excludes file during a
+    DNS outage.  Only set this to false in environments where there is no
+    infrastructure to support reverse DNS lookup.
+    </description>
+  </property>
+
+</configuration>
