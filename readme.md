@@ -6,7 +6,6 @@ This is a small secured cluster i use personnally to test new functionalities on
 ## How to deploy it ?
 
 ```
-cd hadoop-developer-starterkit
 docker compose up --build --force-recreate
 
 # a little workaround to resolve containers name on the host - must be applied as a root
