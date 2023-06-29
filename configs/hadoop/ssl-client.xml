@@ -1,0 +1,40 @@
+<configuration>
+
+  <!-- Client certificate Store -->
+  <property>
+    <name>ssl.client.keystore.type</name>
+    <value>jks</value>
+  </property>
+  <property>
+    <name>ssl.client.keystore.location</name>
+    <value>/etc/security/hadoop-keystores/hadoop.jks</value>
+  </property>
+  <property>
+    <name>ssl.client.keystore.password</name>
+    <value>dumbkeystorespasswd</value>
+  </property>
+
+  <property>
+    <name>ssl.client.keystore.keypassword</name>
+    <value>dumbkeystorespasswd</value>
+  </property>
+
+  <!-- Client Trust Store -->
+  <property>
+    <name>ssl.client.truststore.type</name>
+    <value>jks</value>
+  </property>
+  <property>
+    <name>ssl.client.truststore.location</name>
+    <value>/etc/security/hadoop-trustores/truststore.jks</value>
+  </property>
+  <property>
+    <name>ssl.client.truststore.password</name>
+    <value>dumbkeystorespasswd</value>
+  </property>
+  <property>
+    <name>ssl.client.truststore.reload.interval</name>
+    <value>10000</value>
+  </property>
+
+</configuration>

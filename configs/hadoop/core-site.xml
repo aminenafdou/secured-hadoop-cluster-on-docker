@@ -2,12 +2,70 @@
 
   <property>
     <name>fs.defaultFS</name>
-    <value>hdfs://namenode-1:8020</value>
+    <value>hdfs://namenode-1.hadoop</value>
     <description>The name of the default file system.  A URI whose
   scheme and authority determine the FileSystem implementation.  The
   uri's scheme determines the config property (fs.SCHEME.impl) naming
   the FileSystem implementation class.  The uri's authority is used to
   determine the host, port, etc. for a filesystem.</description>
+  </property>
+
+  <property>
+    <name>hadoop.security.authentication</name>
+    <value>kerberos</value>
+    <description>Possible values are simple (no authentication), and kerberos
+    </description>
+  </property>
+
+  <property>
+    <name>hadoop.rpc.protection</name>
+    <value>privacy</value>
+    <description>A comma-separated list of protection values for secured sasl
+      connections. Possible values are authentication, integrity and privacy.
+      authentication means authentication only and no integrity or privacy;
+      integrity implies authentication and integrity are enabled; and privacy
+      implies all of authentication, integrity and privacy are enabled.
+      hadoop.security.saslproperties.resolver.class can be used to override
+      the hadoop.rpc.protection for a connection at the server side.
+    </description>
+  </property>
+
+  <property>
+    <name>hadoop.security.authorization</name>
+    <value>true</value>
+    <description>Enable authorization for different protocols.</description>
+  </property>
+
+  <property>
+    <name>hadoop.security.auth_to_local</name>
+    <value>
+    RULE:[2:$1/$2@$0](nn/.*@.*HADOOP.LOCAL)s/.*/hdfs/
+    RULE:[2:$1/$2@$0](dn/.*@.*HADOOP.LOCAL)s/.*/hdfs/
+    RULE:[2:$1/$2@$0](nm/.*@.*HADOOP.LOCAL)s/.*/yarn/
+    RULE:[2:$1/$2@$0](rm/.*@.*HADOOP.LOCAL)s/.*/yarn/
+    RULE:[2:$1/$2@$0](jhs/.*@.*HADOOP.LOCAL)s/.*/mapred/
+    RULE:[1:$1@$0](tester@HADOOP.LOCAL)s/.*/tester/
+    DEFAULT
+           DEFAULT
+    </value>
+    <description>The mapping from Kerberos principal names to local OS user names.</description>
+  </property>
+
+  <property>
+    <name>hadoop.proxyuser.HTTP.groups</name>
+    <value>users</value>
+    <description>Allow the superuser HTTP to impersonate any members of the group users.
+    </description>
+  </property>
+
+  <property>
+    <name>hadoop.ssl.server.conf</name>
+    <value>ssl-server.xml</value>
+    <description>
+    Resource file from which ssl server keystore information will be extracted.
+    This file is looked up in the classpath, typically it should be in Hadoop
+    conf/ directory.
+    </description>
   </property>
 
 </configuration>
