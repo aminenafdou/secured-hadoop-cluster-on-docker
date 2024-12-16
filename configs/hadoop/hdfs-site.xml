@@ -132,7 +132,7 @@
 
   <property>
     <name>dfs.namenode.keytab.file</name>
-    <value>/etc/security/keytabs/nn.service.keytab</value>
+    <value>/etc/security/keytabs/hadoop/nn.service.keytab</value>
     <description>
     The keytab file used by each NameNode daemon to login as its
     service principal. The principal name is configured with
@@ -157,7 +157,7 @@
 
   <property>
     <name>dfs.web.authentication.kerberos.keytab</name>
-    <value>/etc/security/keytabs/nn.service.keytab</value>
+    <value>/etc/security/keytabs/hadoop/nn.service.keytab</value>
     <description>
     The keytab file for the principal corresponding to
     dfs.web.authentication.kerberos.principal.
@@ -182,7 +182,7 @@
 
   <property>
     <name>dfs.datanode.keytab.file</name>
-    <value>/etc/security/keytabs/dn.service.keytab</value>
+    <value>/etc/security/keytabs/hadoop/dn.service.keytab</value>
     <description>
     The keytab file used by each DataNode daemon to login as its
     service principal. The principal name is configured with
