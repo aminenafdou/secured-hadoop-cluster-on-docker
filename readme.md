@@ -73,7 +73,7 @@ A simple Hello world file on HDFS ! XD
 docker exec -it edgenode-1 bash
 
 # Kerberos Log in as user tester
-kinit -kt /etc/security/keytabs/tester.keytab tester
+kinit -kt /etc/security/keytabs/hadoop/tester.keytab tester
 
 # put a simple Hello Wolrd ! in hdfs
 echo 'Hello World !' | hdfs dfs -put - /newfile.txt
@@ -87,7 +87,7 @@ filename=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1); dd i
 echo 'Hadoop is the Elephant King! \\nA yellow and elegant thing.\\nHe never forgets\\nUseful data, or lets\\nAn extraneous element cling! ' | hdfs dfs -put - /input.txt
 
 # run a simple map-reduce job on yarn (wordcount example)
-yarn jar /opt/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.1.jar wordcount /input.txt /output
+yarn jar /opt/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.4.1.jar wordcount /input.txt /output
 
 # and then show it
 hdfs dfs -cat /output/*

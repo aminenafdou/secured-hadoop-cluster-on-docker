@@ -42,7 +42,7 @@
   <property>
     <description>The keytab for the resource manager.</description>
     <name>yarn.resourcemanager.keytab</name>
-    <value>/etc/security/keytabs/rm.service.keytab</value>
+    <value>/etc/security/keytabs/hadoop/rm.service.keytab</value>
   </property>
 
   <property>
@@ -54,7 +54,7 @@
   <property>
     <description>Keytab for NM.</description>
     <name>yarn.nodemanager.keytab</name>
-    <value>/etc/security/keytabs/nm.service.keytab</value>
+    <value>/etc/security/keytabs/hadoop/nm.service.keytab</value>
   </property>
 
   <property>
