@@ -267,6 +267,38 @@ services:
     expose:
       - 8044
 
+  jobhistoryserver-1:
+    container_name: jobhistoryserver-1
+    hostname: jobhistoryserver-1.hadoop
+    build: images/hadoop/.
+    user: yarn
+    cpus: 1
+    mem_limit: 1G
+    volumes:
+      - ./configs/hadoop:/etc/hadoop/conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./scripts/hadoop:/opt/hadoop/scripts
+      - my-shared-volume:/etc/security/hadoop-trustores
+    tmpfs:
+      - /opt/hadoop/hadoop_data:uid=1000,gid=1000,mode=770,size=10G
+    networks:
+      hadoop:
+        ipv4_address: 192.168.100.55
+    env_file:
+      - ./env-files/hadoop.env
+      - ./env-files/yarn.env
+    command:
+      - /bin/bash
+      - --verbose
+      - -c
+      - |
+         ~/scripts/jobhistoryserver-init.sh
+    depends_on:
+      resourcemanager-1:
+        condition: service_healthy
+    expose:
+      - 19890
+
   edgenode-1:
     container_name: edgenode-1
     hostname: edgenode-1.hadoop

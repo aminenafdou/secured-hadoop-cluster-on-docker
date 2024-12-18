@@ -1,6 +1,23 @@
 <configuration>
 
   <property>
+    <name>mapreduce.jobhistory.principal</name>
+    <description>
+    Kerberos principal name for the MapReduce JobHistory Server.
+    </description>
+    <value>jhs/_HOST@HADOOP.LOCAL</value>
+  </property>
+
+  <property>
+    <name>mapreduce.jobhistory.keytab</name>
+    <description>
+    Location of the kerberos keytab file for the MapReduce
+    JobHistory Server.
+    </description>
+    <value>/etc/security/keytabs/jhs.service.keytab</value>
+  </property>
+
+  <property>
     <description>The hostname of the RM.</description>
     <name>yarn.resourcemanager.hostname</name>
     <value>resourcemanager-1.hadoop</value>
@@ -16,6 +33,16 @@
       Application Timeline Server.
     </description>
     <name>yarn.log-aggregation-enable</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>yarn.log.server.url</name>
+    <value>https://jobhistoryserver-1.hadoop:19890/jobhistory/logs</value>
+  </property>
+
+  <property>
+    <name>yarn.timeline-service.enabled</name>
     <value>true</value>
   </property>
 
@@ -75,14 +102,14 @@
   </property>
 
   <property>
-      <description>
+    <description>
         This configures the HTTP endpoint for YARN Daemons.The following
         values are supported:
         - HTTP_ONLY : Service is provided only on http
         - HTTPS_ONLY : Service is provided only on https
-      </description>
-      <name>yarn.http.policy</name>
-      <value>HTTPS_ONLY</value>
+    </description>
+    <name>yarn.http.policy</name>
+    <value>HTTPS_ONLY</value>
   </property>
 
 </configuration>

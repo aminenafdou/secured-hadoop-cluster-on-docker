@@ -1,6 +1,20 @@
 <configuration>
 
     <property>
+    <name>mapreduce.jobhistory.address</name>
+    <value>jobhistoryserver-1.hadoop:10020</value>
+    <description>MapReduce JobHistory Server IPC host:port</description>
+    </property>
+
+    <property>
+        <name>mapreduce.jobhistory.webapp.https.address</name>
+        <value>jobhistoryserver-1.hadoop:19890</value>
+        <description>
+            The https address the MapReduce JobHistory Server WebApp is on.
+        </description>
+    </property>
+
+    <property>
         <name>mapreduce.framework.name</name>
         <value>yarn</value>
         <description>The runtime framework for executing MapReduce jobs.
@@ -21,6 +35,34 @@
     <property>
         <name>mapreduce.reduce.env</name>
         <value>HADOOP_MAPRED_HOME=/opt/hadoop</value>
+    </property>
+
+    <property>
+        <name>mapreduce.jobhistory.principal</name>
+        <description>
+    Kerberos principal name for the MapReduce JobHistory Server.
+        </description>
+        <value>jhs/_HOST@HADOOP.LOCAL</value>
+    </property>
+
+    <property>
+        <name>mapreduce.jobhistory.keytab</name>
+        <description>
+    Location of the kerberos keytab file for the MapReduce
+    JobHistory Server.
+        </description>
+        <value>/etc/security/keytabs/hadoop/jhs.service.keytab</value>
+    </property>
+
+    <property>
+        <name>mapreduce.jobhistory.http.policy</name>
+        <value>HTTPS_ONLY</value>
+        <description>
+    This configures the HTTP endpoint for JobHistoryServer web UI.
+    The following values are supported:
+    - HTTP_ONLY : Service is provided only on http
+    - HTTPS_ONLY : Service is provided only on https
+        </description>
     </property>
 
 </configuration>
