@@ -3,7 +3,7 @@ FROM ubuntu:focal
 LABEL maintainer="aminenafdou@gmail.com"
 LABEL description="Simple Kerberos server"
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Add kerberos user in the group 0 to have access to the mounted volumes and storage
 RUN /bin/bash -c 'useradd -m -u 1000 -g 0 kerberos'

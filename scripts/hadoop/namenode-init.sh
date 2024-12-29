@@ -15,4 +15,5 @@ create_tls_keystore
 hdfs namenode -format
 
 # Start Namenode
+export HADOOP_NAMENODE_OPTS="-Xmx3g"
 hdfs namenode

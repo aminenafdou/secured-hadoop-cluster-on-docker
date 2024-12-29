@@ -11,4 +11,5 @@ create_kerberos_keytabs
 create_tls_keystore
 
 # Start Datanode
+export HADOOP_DATANODE_OPTS="-Xmx6g"
 hdfs datanode

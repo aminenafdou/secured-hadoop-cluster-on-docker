@@ -44,6 +44,7 @@
     RULE:[2:$1/$2@$0](nm/.*@.*HADOOP.LOCAL)s/.*/yarn/
     RULE:[2:$1/$2@$0](rm/.*@.*HADOOP.LOCAL)s/.*/yarn/
     RULE:[2:$1/$2@$0](jhs/.*@.*HADOOP.LOCAL)s/.*/mapred/
+    RULE:[2:$1/$2@$0](shs/.*@.*HADOOP.LOCAL)s/.*/spark/
     RULE:[1:$1@$0](tester@HADOOP.LOCAL)s/.*/tester/
     DEFAULT
     </value>

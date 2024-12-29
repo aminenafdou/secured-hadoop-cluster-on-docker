@@ -1,14 +1,25 @@
+version: '3.8'
 services:
+
+  common-hadoop:
+    build: images/hadoop/.
+    image: hadoop:3.4.1  # Tag the image
 
   kerberos-server:
     container_name: kerberos-server
     hostname: kerberos-server.hadoop
     build: images/kerberos/.
-    cpus: 1
-    mem_limit: 1G
+    deploy:
+      resources:
+        limits:
+          cpus: 4
+          memory: 4GB
+        reservations:
+          cpus: 2
+          memory: 2GB
     user: kerberos
     volumes:
-      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5.conf
       - ./configs/kerberos/kdc.conf:/etc/krb5kdc/kdc.conf
       - ./configs/kerberos/kadm5.acl:/etc/krb5kdc/kadm5.acl
       - ./scripts/kerberos:/home/kerberos/scripts
@@ -31,14 +42,20 @@ services:
   namenode-1:
     container_name: namenode-1
     hostname: namenode-1.hadoop
-    build: images/hadoop/.
+    image: hadoop:3.4.1
     user: hdfs
     tty: false
-    cpus: 1
-    mem_limit: 1G
+    deploy:
+      resources:
+        limits:
+          cpus: 4
+          memory: 4GB
+        reservations:
+          cpus: 2
+          memory: 2GB
     volumes:
       - ./configs/hadoop:/etc/hadoop/conf
-      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5.conf
       - ./scripts/hadoop:/opt/hadoop/scripts
       - my-shared-volume:/etc/security/hadoop-trustores
     tmpfs:
@@ -64,19 +81,27 @@ services:
     depends_on:
       kerberos-server:
         condition: service_started
+      common-hadoop:
+        condition: service_started
     expose:
       - 9871
 
   datanode-1:
     container_name: datanode-1
     hostname: datanode-1.hadoop
-    build: images/hadoop/.
+    image: hadoop:3.4.1
     user: hdfs
-    cpus: 1
-    mem_limit: 1G
+    deploy:
+      resources:
+        limits:
+          cpus: 4
+          memory: 8GB
+        reservations:
+          cpus: 2
+          memory: 2GB
     volumes:
       - ./configs/hadoop:/etc/hadoop/conf
-      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5.conf
       - ./scripts/hadoop:/opt/hadoop/scripts
       - my-shared-volume:/etc/security/hadoop-trustores
     tmpfs:
@@ -110,13 +135,19 @@ services:
   datanode-2:
     container_name: datanode-2
     hostname: datanode-2.hadoop
-    build: images/hadoop/.
+    image: hadoop:3.4.1
     user: hdfs
-    cpus: 1
-    mem_limit: 1G
+    deploy:
+      resources:
+        limits:
+          cpus: 4
+          memory: 8GB
+        reservations:
+          cpus: 2
+          memory: 2GB
     volumes:
       - ./configs/hadoop:/etc/hadoop/conf
-      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5.conf
       - ./scripts/hadoop:/opt/hadoop/scripts
       - my-shared-volume:/etc/security/hadoop-trustores
     tmpfs:
@@ -150,13 +181,19 @@ services:
   resourcemanager-1:
     container_name: resourcemanager-1
     hostname: resourcemanager-1.hadoop
-    build: images/hadoop/.
+    image: hadoop:3.4.1
     user: yarn
-    cpus: 1
-    mem_limit: 4G
+    deploy:
+      resources:
+        limits:
+          cpus: 4
+          memory: 4GB
+        reservations:
+          cpus: 2
+          memory: 2GB
     volumes:
       - ./configs/hadoop:/etc/hadoop/conf
-      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5.conf
       - ./scripts/hadoop:/opt/hadoop/scripts
       - my-shared-volume:/etc/security/hadoop-trustores
     tmpfs:
@@ -190,13 +227,19 @@ services:
   nodemanager-1:
     container_name: nodemanager-1
     hostname: nodemanager-1.hadoop
-    build: images/hadoop/.
+    image: hadoop:3.4.1
     user: yarn
-    cpus: 1
-    mem_limit: 2G
+    deploy:
+      resources:
+        limits:
+          cpus: 8
+          memory: 16GB
+        reservations:
+          cpus: 2
+          memory: 2GB
     volumes:
       - ./configs/hadoop:/etc/hadoop/conf
-      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5.conf
       - ./configs/hadoop/container-executor.cfg:/var/lib/etc/hadoop/container-executor.cfg
       - ./scripts/hadoop:/opt/hadoop/scripts
       - my-shared-volume:/etc/security/hadoop-trustores
@@ -230,13 +273,19 @@ services:
   nodemanager-2:
     container_name: nodemanager-2
     hostname: nodemanager-2.hadoop
-    build: images/hadoop/.
+    image: hadoop:3.4.1
     user: yarn
-    cpus: 1
-    mem_limit: 2G
+    deploy:
+      resources:
+        limits:
+          cpus: 8
+          memory: 16GB
+        reservations:
+          cpus: 2
+          memory: 2GB
     volumes:
       - ./configs/hadoop:/etc/hadoop/conf
-      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5.conf
       - ./configs/hadoop/container-executor.cfg:/var/lib/etc/hadoop/container-executor.cfg
       - ./scripts/hadoop:/opt/hadoop/scripts
       - my-shared-volume:/etc/security/hadoop-trustores
@@ -267,49 +316,25 @@ services:
     expose:
       - 8044
 
-  jobhistoryserver-1:
-    container_name: jobhistoryserver-1
-    hostname: jobhistoryserver-1.hadoop
-    build: images/hadoop/.
-    user: yarn
-    cpus: 1
-    mem_limit: 1G
-    volumes:
-      - ./configs/hadoop:/etc/hadoop/conf
-      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
-      - ./scripts/hadoop:/opt/hadoop/scripts
-      - my-shared-volume:/etc/security/hadoop-trustores
-    tmpfs:
-      - /opt/hadoop/hadoop_data:uid=1000,gid=1000,mode=770,size=10G
-    networks:
-      hadoop:
-        ipv4_address: 192.168.100.55
-    env_file:
-      - ./env-files/hadoop.env
-      - ./env-files/yarn.env
-    command:
-      - /bin/bash
-      - --verbose
-      - -c
-      - |
-         ~/scripts/jobhistoryserver-init.sh
-    depends_on:
-      resourcemanager-1:
-        condition: service_healthy
-    expose:
-      - 19890
-
   edgenode-1:
     container_name: edgenode-1
     hostname: edgenode-1.hadoop
-    build: images/hadoop/.
-    cpus: 1
-    mem_limit: 1G
-    user: hadoop
+    image: hadoop:3.4.1
+    deploy:
+      resources:
+        limits:
+          cpus: 4
+          memory: 4GB
+        reservations:
+          cpus: 2
+          memory: 2GB
+    user: tester
     volumes:
       - ./configs/hadoop:/etc/hadoop/conf
-      - ./configs/kerberos/krb5.conf:/etc/krb5/krb5.conf
+      - ./configs/kerberos/krb5.conf:/etc/krb5.conf
       - ./scripts/hadoop:/opt/hadoop/scripts
+      - ./configs/spark/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
+      - my-shared-volume:/etc/security/hadoop-trustores
     tmpfs:
       - /opt/hadoop/hadoop_data:uid=1000,gid=1000,mode=770,size=10G
     networks:
@@ -317,6 +342,8 @@ services:
         ipv4_address: 192.168.100.100
     env_file:
       - ./env-files/hadoop.env
+      - ./env-files/yarn.env
+      - ./env-files/spark.env
     command:
       - /bin/bash
       - --verbose
@@ -331,6 +358,9 @@ services:
         condition: service_healthy
       nodemanager-2:
         condition: service_healthy
+    expose:
+      - 18080
+      - 19890
 
 networks:
   hadoop:

@@ -2,6 +2,8 @@
 
 function create_internal_directories() {
     sudo mkdir -p ${SSL_KEYSTORES_PATH}
+    sudo chmod 770 ${SSL_KEYSTORES_PATH}
+    sudo chmod 770 ${SSL_TRUSTSTORES_PATH}
     sudo chown ${HADOOP_USER}:${HADOOP_GROUP} -R ${SSL_KEYSTORES_PATH}
     sudo chown ${HADOOP_USER}:${HADOOP_GROUP} -R ${SSL_TRUSTSTORES_PATH}
     sudo chown ${HADOOP_USER}:${HADOOP_GROUP} -R ${SCRIPTS_PATH}
@@ -50,6 +52,8 @@ function create_tls_keystore() {
             -file ${SSL_KEYSTORES_PATH}/${SSL_ALIAS}.cer \
             -keypass ${STORE_PASSWD} -storepass ${STORE_PASSWD} \
             -keystore ${SSL_TRUSTSTORE_PATH} -noprompt
+
+
 
     # Show Keystore Content
     echo -e "\n\n ==================== Keystore Content : ================================="

@@ -2,13 +2,13 @@
 
     <property>
     <name>mapreduce.jobhistory.address</name>
-    <value>jobhistoryserver-1.hadoop:10020</value>
+    <value>edgenode-1.hadoop:10020</value>
     <description>MapReduce JobHistory Server IPC host:port</description>
     </property>
 
     <property>
         <name>mapreduce.jobhistory.webapp.https.address</name>
-        <value>jobhistoryserver-1.hadoop:19890</value>
+        <value>edgenode-1.hadoop:19890</value>
         <description>
             The https address the MapReduce JobHistory Server WebApp is on.
         </description>

@@ -18,4 +18,5 @@ sudo chown root:hadoop /var/lib/etc/hadoop/container-executor.cfg
 sudo chmod 440 /var/lib/etc/hadoop/container-executor.cfg
 
 # Start NodeManager
+export YARN_NODEMANAGER_OPTS="-Xmx15g"
 yarn nodemanager

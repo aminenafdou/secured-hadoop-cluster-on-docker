@@ -12,4 +12,5 @@ create_kerberos_keytabs
 create_tls_keystore
 
 # Start ResourceManager
+export YARN_RESOURCEMANAGER_OPTS="-Xmx3g"
 yarn resourcemanager
